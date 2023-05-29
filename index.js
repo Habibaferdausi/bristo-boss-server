@@ -28,6 +28,7 @@ async function run() {
     const menuCollection = client.db("ResturentDB").collection("menu");
     const reviewCollection = client.db("ResturentDB").collection("reviews");
     const cartCollection = client.db("ResturentDB").collection("carts");
+    const usersCollection = client.db("ResturentDB").collection("users");
 
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
@@ -62,6 +63,26 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //user
+
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+
+      if (existingUser) {
+        return res.send({ message: "user already exists" });
+      }
+
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
