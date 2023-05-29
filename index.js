@@ -27,7 +27,7 @@ async function run() {
 
     const menuCollection = client.db("ResturentDB").collection("menu");
     const reviewCollection = client.db("ResturentDB").collection("reviews");
-    const cartCollection = client.db("ResturentDB").collection("cart");
+    const cartCollection = client.db("ResturentDB").collection("carts");
 
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
@@ -46,6 +46,17 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/carts", async (req, res) => {
+      const email = req.query.email;
+      console.log(email);
+
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
