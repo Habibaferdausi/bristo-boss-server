@@ -52,6 +52,7 @@ async function run() {
     const reviewCollection = client.db("ResturentDB").collection("reviews");
     const cartCollection = client.db("ResturentDB").collection("carts");
     const usersCollection = client.db("ResturentDB").collection("users");
+    const paymentCollection = client.db("ResturentDB").collection("payments");
 
     //JWT
 
@@ -181,7 +182,7 @@ async function run() {
       res.send(result);
     });
 
-    //payments
+    //payments create
 
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
@@ -190,6 +191,18 @@ async function run() {
         amount: amount,
         currency: "usd",
         payment_method_types: ["card"],
+      });
+      //payment info
+      app.post("/payments", verifyJWT, async (req, res) => {
+        const payment = req.body;
+        const insertResult = await paymentCollection.insertOne(payment);
+
+        const query = {
+          _id: { $in: payment.cartItems.map((id) => new ObjectId(id)) },
+        };
+        const deleteResult = await cartCollection.deleteMany(query);
+
+        res.send({ insertResult, deleteResult });
       });
 
       res.send({
